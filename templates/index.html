@@ -1,0 +1,276 @@
+{%  load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<!--update Form-->
+
+<h1>Hello</h1>
+
+<form method="post" enctype="multipart/form-data" action="#" id="formupdate">
+    {% csrf_token %}
+<input type="hidden" name="id" id="uid">
+    <p>
+<label>   Name</label><br>
+    <input type="text" name="name" id="uname">
+
+</p>
+    <p>
+<label>   Number</label><br>
+    <input type="text" name="number" id="unumber">
+
+</p>
+    <p>
+<label>  email</label><br>
+    <input type="email" name="email" id="uemail">
+
+</p>
+    <p>
+<label> password</label><br>
+    <input type="password" name="password" id="upassword">
+
+</p>
+
+    <br>
+    <input type="button" id="btn_update" value="Update">
+</form>
+<!--Add Form-->
+<form method="post" enctype="multipart/form-data" action="#" id="formreg">
+    {% csrf_token %}
+<p>
+<label>   Name</label><br>
+    <input type="text" name="name" id="name">
+
+</p>
+    <p>
+<label>   Number</label><br>
+    <input type="text" name="number" id="number">
+
+</p>
+    <p>
+<label>  email</label><br>
+    <input type="email" name="email" id="email">
+
+</p>
+    <p>
+<label> password</label><br>
+    <input type="password" name="password" id="passoword">
+
+</p>
+
+    <br>
+    <input type="button" id="btn_save" value="register">
+</form>
+<div style="height:400px;overflow: auto;width:100%;">
+    <h1> User Information</h1>
+    <table border="1" style="width:98%;">
+    <thead>
+        <tr>
+            <td>ID</td>
+            <td>Name</td>
+            <td>Number</td>
+            <td>Email ID</td>
+            <td>Password</td>
+            <td>Update</td>
+            <td>Delete</td>
+        </tr>
+    </thead>
+       <tbody id="tbody" >
+        {% for o in obj %}
+
+            <tr>
+            <td>{{ o.id }}</td>
+                    <td>{{ o.name }}</td>
+                    <td>{{ o.number }}</td>
+                    <td>{{ o.email }}</td>
+                    <td>{{ o.password }}</td>
+                    <td><input type="button" value="Edit" class="editbtn" data-sid="{{ o.id }}"></td>
+                    <td><input type="button" value="Delete" class="deletebtn" data-sid="{{ o.id }}"></td>
+        </tr>
+
+        {% endfor %}
+         </tbody>
+    </table>
+</div>
+<!--
+<script>
+$(document).ready(function(){
+    $("#btn_save").click(function (){
+         console.log("button clicked")
+     var nm=$("#name").val();
+     var no=$("#number").val();
+     var em=$("#email").val();
+     var ps=$("#passoword").val();
+     const my_data={name:nm,number:no,email:em,password:ps,csrfmiddlewaretoken:$('input[name=csrfmiddlewaretoken]').val()};
+     console.log(my_data)
+     //xhr.responseType="JSON";
+     //create object
+     var xhr = new XMLHttpRequest();
+     //initialize The Objec
+     //xhr.open("POST","{% url 'reg_check' %}",true);
+     //check
+        //xhr.onload=function(){
+
+             if(xhr.status===200){
+                 let datas=JSON.parse(xhr.response);
+                 console.log(datas.status);
+             }
+                 else{
+                      console.log("error");
+                 }
+       // };
+        //send the request
+     //xhr.send(my_data);
+    });
+
+});
+
+
+</script>
+-->
+<script>
+$(document).ready(function(){
+    $("#formupdate").hide();
+    $("#btn_save").click(function (){
+         //console.log("button clicked")
+        f="";
+     var nm=$("#name").val();
+     var no=$("#number").val();
+     var em=$("#email").val();
+     var ps=$("#passoword").val();
+     const my_data={name:nm,number:no,email:em,password:ps,csrfmiddlewaretoken:$('input[name=csrfmiddlewaretoken]').val ()};
+     console.log(my_data)
+    //Insert Ajax
+        $.ajax({
+        url:'{% url 'reg_check' %}',
+        method:'POST',
+        data:my_data,
+        dataType:"JSON",
+        success:function(data){
+            //console.log(data);
+            x=data.ud;
+
+            if (data.status == "save kar diya bhai") {
+                console.log("form submitted successfully");
+
+                for (i = 0; i < x.length; i++) {
+                    f += "<tr><td>" + x[i].id + "</td><td>" + x[i].name + "</td><td>" + x[i].number + "</td><td>" + x[i].email + "</td><td>" + x[i].password + "</td><td><input type='button' class='editbtn' value='Edit' data-sid=" + x[i].id + "></td><td><input type='button' value='Delete' class='deletebtn' data-sid="+ x[i].id +"></td></tr>";
+                }
+
+                $("#tbody").html(f);
+                $("#formreg")[0].reset();
+
+            }
+        },
+    });
+    });
+    // Delete Ajax
+    $("tbody").on("click",".deletebtn",(function(){
+       let id=$(this).attr("data-sid");
+       let cs=$("input[name=csrfmiddlewaretoken]").val();
+        console.log('button');
+
+        const my_data={id:id,csrfmiddlewaretoken: cs};
+        mythis=this;
+
+        $.ajax({
+            url:"{% url 'delete' %}",
+            method:"POST",
+            data:my_data,
+            dataType:'JSON',
+            success:function(data){
+                if (data.status == "Delete"){
+                    console.log('data delete Successfully');
+                    $(mythis).closest("tr").fadeOut(2000);
+
+                }
+                else{
+                    console.log('data not delete Successfully');
+
+                }
+
+
+                             },
+        });
+
+    }));
+//update Ajax
+        $("tbody").on("click",".editbtn",(function(){
+        let id=$(this).attr("data-sid");
+        let cs=$("input[name=csrfmiddlewaretoken]").val();
+        console.log('button');
+        $("#formreg").hide();
+        $("#formupdate").show();
+
+        const my_data={id:id,csrfmiddlewaretoken: cs};
+        //mythis=this;
+
+         $.ajax({
+            url:"{% url 'update' %}",
+            method:"POST",
+            data:my_data,
+            dataType:'JSON',
+            success:function(data){
+
+                    console.log(data);
+                    $("#uid").val(data.id);
+                    $("#uname").val(data.name);
+                    $("#unumber").val(data.number);
+                    $("#uemail").val(data.email);
+                    $("#upassword").val(data.password);
+
+
+
+
+
+                             },
+        });
+
+    }));
+//do update Ajax
+    $("#btn_update").click(function(){
+        var id=$("#uid").val();
+        var name=$("#uname").val();
+        var number=$("#unumber").val();
+        var email=$("#uemail").val();
+        var password=$("#upassword").val();
+        var cs=$("input[name=csrfmiddlewaretoken]").val();
+        const my_data={id:id,name:name,number:number,email:email,password:password,csrfmiddlewaretoken:cs};
+        $.ajax({
+           url:"{% url 'doupdate' %}",
+           method:"POST",
+           data:my_data,
+           dataType:"JSON",
+           success:function(data){
+               if(data.status == "Update"){
+                   console.log('data update');
+                   location.reload();
+                   $("#formupdate").hide();
+                   $("#formreg").show();
+               }
+
+           },
+        });
+
+
+
+
+
+
+    });
+
+
+});
+
+
+</script>
+
+
+
+</body>
+</html>

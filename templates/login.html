@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+{{ msg }}
+{% if status is not none %}
+{{ status }}
+
+{% endif %}
+<form method="post" enctype="multipart/form-data" action="#">
+    {% csrf_token %}
+    <p>Number</p>
+    <br>
+    <input type="text" name="number" id="number" class="infield">
+    <br>
+    <p>Password</p>
+    <br><input type="password" name="password" id="password" class="infield">
+    <input type="button" id="btn_save" value="register">
+</form>
+<div id="alert"></div>
+<script>
+$(document).ready(function(){
+    $("#btn_save").click(function (){
+         console.log("button clicked")
+
+     var no=$("#number").val();
+
+     var ps=$("#password").val();
+     var cs=$("input[name=csrfmiddlewaretoken]").val();
+     const my_data={number:no,password:ps,csrfmiddlewaretoken:cs};
+     console.log(my_data)
+    $.ajax({
+        url:'{% url 'login_check' %}',
+        method:'POST',
+        data:my_data,
+        dataType:"JSON",
+        success:function(data){
+                      //console.log(data);
+                      var s=data.status;
+                      $("#alert").html(s);
+                      window.alert(s);
+                      if(s=="Login Success") {
+                          window.open("{% url 'index' %}",'_self');
+                      }
+
+        },
+    });
+    });
+
+});
+
+
+</script>
+</body>
+</html>
+
+
+
+
